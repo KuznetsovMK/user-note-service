@@ -1,0 +1,19 @@
+version: "3.8"
+services:
+  client-frontend:
+    image: frontend:0.0.1
+    build: ./user-note-frontend
+    restart: always
+    ports:
+      - '3000:3000'
+    volumes:
+      - /user-note/server/node_modules
+      - ./user-note-frontend:/user-note/server
+
+  client-backend:
+    image: user_note:0.0.1
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"

@@ -1,0 +1,267 @@
+openapi: 3.0.3
+info:
+  title: Swagger user_note
+  description: >-
+    Note service for users
+  version: 1.0.0
+servers:
+  - url: http://user_note/api
+paths:
+  /auth/login:
+    post:
+      tags:
+        - auth
+      summary: Validate client user login and return its id.
+      operationId: loginClientUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginClientUserRequest'
+        required: true
+      responses:
+        '200':
+          description: OK (successful operation)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientUser'
+        '400':
+          description: Incorrect input
+          content: { }
+      x-codegen-request-body-name: body
+  /client-user/create:
+    post:
+      tags:
+        - client-user
+      summary: Create new user
+      operationId: createUser
+      requestBody:
+        description: Create new user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateClientUserRequest'
+        required: true
+      responses:
+        '200':
+          description: CREATED (successful operation)
+          content: { }
+        '400':
+          description: Incorrect input
+          content: { }
+        '409':
+          description: ClientUser already exists
+          content: { }
+      x-codegen-request-body-name: request
+  /client-user-note/find-all-my-notes/{clientUserId}:
+    get:
+      tags:
+        - client-user-note
+      summary: Finds all note for user.
+      operationId: findAllMyNotes
+      parameters:
+        - name: clientUserId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: a3e41663-159f-4af1-bf0b-0f50e25572e8
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/offsetParam'
+      responses:
+        '200':
+          description: OK (successful operation)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FindAllClientUserNoteResponse'
+  /client-user-note/create:
+    post:
+      tags:
+        - client-user-note
+      summary: Create new note for user
+      operationId: createNote
+      requestBody:
+        description: User want to create new note
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateClientUserNoteRequest'
+        required: true
+      responses:
+        '200':
+          description: CREATED (successful operation)
+          content: { }
+        '400':
+          description: Incorrect input
+          content: { }
+        '404':
+          description: User is not found
+          content: { }
+      x-codegen-request-body-name: request
+  /client-user-note/update:
+    put:
+      tags:
+        - client-user-note
+      summary: Update user note
+      operationId: updateNote
+      requestBody:
+        description: User want to update note
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateClientUserNoteRequest'
+        required: true
+      responses:
+        '200':
+          description: OR (successful operation)
+          content: { }
+        '400':
+          description: Incorrect input
+          content: { }
+        '404':
+          description: User is not found
+          content: { }
+      x-codegen-request-body-name: request
+  /note/find-one/{id}:
+    get:
+      tags:
+        - note
+      summary: Find note by id.
+      operationId: findById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: a3e41663-159f-4af1-bf0b-0f50e25572e8
+      responses:
+        '200':
+          description: OK (successful operation)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
+        '404':
+          description: Note is not found
+          content: { }
+  /note/delete/{id}:
+    delete:
+      tags:
+        - note
+      summary: Delete note by id.
+      operationId: deleteById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: a3e41663-159f-4af1-bf0b-0f50e25572e8
+      responses:
+        '204':
+          description: No Content (successful operation)
+          content: { }
+        '404':
+          description: Note is not found
+          content: { }
+components:
+  schemas:
+    LoginClientUserRequest:
+      type: object
+      required:
+        - login
+      properties:
+        login:
+          type: string
+          example: "MyLogin123"
+    CreateClientUserRequest:
+      type: object
+      required:
+        - id
+        - login
+      properties:
+        id:
+          type: string
+          format: uuid
+        login:
+          type: string
+          example: "MyLogin123"
+    FindAllClientUserNoteResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/Note'
+    CreateClientUserNoteRequest:
+      type: object
+      required:
+        - clientUserId
+      properties:
+        clientUserId:
+          type: string
+          format: uuid
+        text:
+          type: string
+          maxLength: 5000
+          example: "He needs enterprise version of Idea. #fun, #developer, #speaker, #needs-enterprise-idea"
+    UpdateClientUserNoteRequest:
+      type: object
+      required:
+        - clientUserId
+      properties:
+        clientUserId:
+          type: string
+          format: uuid
+        noteId:
+          type: string
+          format: uuid
+        text:
+          type: string
+          maxLength: 5000
+          example: "He needs enterprise version of Idea. #fun, #developer, #speaker, #needs-enterprise-idea"
+    ClientUser:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: a3e41663-159f-4af1-bf0b-0f50e25572e8
+        login:
+          type: string
+          example: "MyLogin"
+    Note:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: a3e41663-159f-4af1-bf0b-0f50e25572e8
+        text:
+          type: string
+          example: "He needs enterprise version of Idea. #fun, #developer, #speaker, #needs-enterprise-idea"
+  parameters:
+    limitParam:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        maximum: 1000
+        minimum: 0
+        default: 20
+      example: 20
+      description: The numbers of items to return.
+    offsetParam:
+      name: offset
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+      example: 2
+      description: The number of items to skip before starting to collect the result set.
